@@ -38,7 +38,8 @@ public class ItemDonation {
     private User ngo;
 
     @Column(name = "is_emergency")
-    private boolean isEmergency = false;
+    private Boolean isEmergency = false;
+
 
 
     // Getters and Setters

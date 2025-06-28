@@ -15,7 +15,7 @@ public class ItemDonationStatusKafkaProducer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void sendDonationStatusUpdate(ItemDonationStatusKafkaMessage message) {
+    public void sendItemDonationStatusUpdate(ItemDonationStatusKafkaMessage message) {
         try {
             String json = objectMapper.writeValueAsString(message);
             kafkaTemplate.send(KafkaTopicConfig.ITEM_DONATION_STATUS_TOPIC, json);
@@ -24,4 +24,5 @@ public class ItemDonationStatusKafkaProducer {
             System.err.println("❌ Failed to send Kafka status update: " + e.getMessage());
         }
     }
+
 }

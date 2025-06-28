@@ -3,10 +3,12 @@ package com.donora.service.impl;
 import com.donora.dto.ItemDonationRequest;
 import com.donora.dto.ItemDonationResponse;
 import com.donora.dto.kafka.ItemDonationKafkaMessage;
+import com.donora.dto.kafka.ItemDonationStatusKafkaMessage;
 import com.donora.entity.ItemDonation;
 import com.donora.entity.User;
 import com.donora.enums.DonationStatus;
 import com.donora.kafka.producer.ItemDonationKafkaProducer;
+import com.donora.kafka.producer.ItemDonationStatusKafkaProducer;
 import com.donora.repository.ItemDonationRepository;
 import com.donora.repository.UserRepository;
 import com.donora.service.ItemDonationService;
@@ -28,6 +30,8 @@ public class ItemDonationServiceImpl implements ItemDonationService {
 
     @Autowired
     private ItemDonationKafkaProducer itemDonationKafkaProducer;
+    @Autowired
+    private ItemDonationStatusKafkaProducer statusKafkaProducer;
 
 
     @Override
@@ -40,6 +44,8 @@ public class ItemDonationServiceImpl implements ItemDonationService {
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
+
     @Override
     public void updateItemDonationStatus(Long donationId, String ngoEmail, String newStatus) {
         User ngo = userRepository.findByEmail(ngoEmail)
@@ -61,6 +67,15 @@ public class ItemDonationServiceImpl implements ItemDonationService {
 
         donation.setStatus(statusEnum);
         itemDonationRepository.save(donation);
+
+        // ✅ Send Kafka message to notify donor
+        ItemDonationStatusKafkaMessage message = new ItemDonationStatusKafkaMessage();
+        message.setDonorEmail(donation.getDonor().getEmail());
+        message.setItemName(donation.getItemName());
+        message.setQuantity(donation.getQuantity());
+        message.setNewStatus(donation.getStatus().name());
+
+        statusKafkaProducer.sendItemDonationStatusUpdate(message);
     }
 
     @Override
