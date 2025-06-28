@@ -2,9 +2,11 @@ package com.donora.service.impl;
 
 import com.donora.dto.FoodDonationRequest;
 import com.donora.dto.FoodDonationResponse;
+import com.donora.dto.kafka.FoodDonationKafkaMessage;
 import com.donora.entity.FoodDonation;
 import com.donora.entity.User;
 import com.donora.enums.DonationStatus;
+import com.donora.kafka.producer.FoodDonationKafkaProducer;
 import com.donora.repository.FoodDonationRepository;
 import com.donora.repository.UserRepository;
 import com.donora.service.FoodDonationService;
@@ -23,6 +25,10 @@ public class FoodDonationServiceImpl implements FoodDonationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FoodDonationKafkaProducer foodDonationKafkaProducer;
+
 
     @Override
     public List<FoodDonationResponse> getFoodDonationsForNgo(String ngoEmail) {
@@ -83,7 +89,13 @@ public class FoodDonationServiceImpl implements FoodDonationService {
         donation.setStatus(DonationStatus.PENDING);
         donation.setCreatedAt(LocalDateTime.now());
 
-        foodDonationRepository.save(donation);
+        FoodDonationKafkaMessage kafkaMsg = new FoodDonationKafkaMessage();
+        kafkaMsg.setDonorEmail(business.getEmail());
+        kafkaMsg.setFoodName(request.getFoodName());
+        kafkaMsg.setQuantity(request.getQuantity());
+        kafkaMsg.setNgoEmail(ngo.getEmail());
+
+        foodDonationKafkaProducer.sendFoodDonationCreatedEvent(kafkaMsg);
     }
 
 

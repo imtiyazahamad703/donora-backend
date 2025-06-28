@@ -2,9 +2,11 @@ package com.donora.service.impl;
 
 import com.donora.dto.ItemDonationRequest;
 import com.donora.dto.ItemDonationResponse;
+import com.donora.dto.kafka.ItemDonationKafkaMessage;
 import com.donora.entity.ItemDonation;
 import com.donora.entity.User;
 import com.donora.enums.DonationStatus;
+import com.donora.kafka.producer.ItemDonationKafkaProducer;
 import com.donora.repository.ItemDonationRepository;
 import com.donora.repository.UserRepository;
 import com.donora.service.ItemDonationService;
@@ -23,6 +25,10 @@ public class ItemDonationServiceImpl implements ItemDonationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ItemDonationKafkaProducer itemDonationKafkaProducer;
+
 
     @Override
     public List<ItemDonationResponse> getItemDonationsForNgo(String ngoEmail) {
@@ -83,7 +89,18 @@ public class ItemDonationServiceImpl implements ItemDonationService {
         donation.setStatus(DonationStatus.PENDING);
         donation.setCreatedAt(LocalDateTime.now());
 
-        itemDonationRepository.save(donation);
+        ItemDonation savedDonation = itemDonationRepository.save(donation);
+
+// 🔥 Send Kafka Event
+        ItemDonationKafkaMessage message = new ItemDonationKafkaMessage();
+        message.setDonationId(savedDonation.getId());
+        message.setItemName(savedDonation.getItemName());
+        message.setQuantity(savedDonation.getQuantity());
+        message.setNgoEmail(ngo.getEmail());
+        message.setDonorEmail(donor.getEmail());
+
+        itemDonationKafkaProducer.sendItemDonationCreatedEvent(message);
+
     }
 
 
