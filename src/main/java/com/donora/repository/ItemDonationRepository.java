@@ -15,5 +15,7 @@ public interface ItemDonationRepository extends JpaRepository<ItemDonation, Long
     int countByNgoAndStatus(User ngo, DonationStatus status);
     List<ItemDonation> findTop5ByNgoAndStatusOrderByCreatedAtDesc(User ngo, DonationStatus status);
     List<ItemDonation> findByNgoAndStatus(User ngo, DonationStatus status);
+    List<ItemDonation> findByDonor(User donor);
+    List<ItemDonation> findByDonorEmailOrderByCreatedAtDesc(String email);
 
 }

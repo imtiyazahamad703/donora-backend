@@ -10,7 +10,7 @@ import java.util.List;
 public interface FoodDonationRepository extends JpaRepository<FoodDonation, Long> {
 
     List<FoodDonation> findByNgo(User ngo);
-
+    List<FoodDonation> findByDonor(User donor);
     // ✅ Add these two methods for impact tracking
     int countByNgoAndStatus(User ngo, DonationStatus status);
     List<FoodDonation> findTop5ByNgoAndStatusOrderByCreatedAtDesc(User ngo, DonationStatus status);
