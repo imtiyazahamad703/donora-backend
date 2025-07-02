@@ -20,6 +20,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private NgoProfile ngoProfile;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private BusinessProfile businessProfile;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private IndividualProfile individualProfile;
 
     // Getters and Setters
     public Long getId() {
@@ -84,5 +92,29 @@ public class User {
 
     public void setLocationLong(Double locationLong) {
         this.locationLong = locationLong;
+    }
+
+    public NgoProfile getNgoProfile() {
+        return ngoProfile;
+    }
+
+    public void setNgoProfile(NgoProfile ngoProfile) {
+        this.ngoProfile = ngoProfile;
+    }
+
+    public BusinessProfile getBusinessProfile() {
+        return businessProfile;
+    }
+
+    public void setBusinessProfile(BusinessProfile businessProfile) {
+        this.businessProfile = businessProfile;
+    }
+
+    public IndividualProfile getIndividualProfile() {
+        return individualProfile;
+    }
+
+    public void setIndividualProfile(IndividualProfile individualProfile) {
+        this.individualProfile = individualProfile;
     }
 }
