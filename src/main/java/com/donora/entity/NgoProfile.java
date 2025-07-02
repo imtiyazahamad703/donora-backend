@@ -2,28 +2,28 @@ package com.donora.entity;
 
 import jakarta.persistence.*;
 
-@Entity
-@Table(name = "ngo_profiles")
-public class NgoProfile {
+    @Entity
+    @Table(name = "ngo_profiles")
+    public class NgoProfile {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    private String organizationName;
-    private String registrationNumber;
-    private String contactPerson;
-    private String contactPhone;
-    private String address;
-    private String city;
-    private String state;
-    private String pinCode;
-    private String focusArea;
-    private String website;
+        private String organizationName;
+        private String registrationNumber;
+        private String contactPerson;
+        private String contactPhone;
+        private String address;
+        private String city;
+        private String state;
+        private String pinCode;
+        private String focusArea;
+        private String website;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+        @OneToOne
+        @JoinColumn(name = "user_id", nullable = false, unique = true)
+        private User user;
 
     // Getters and Setters
     public Long getId() { return id; }

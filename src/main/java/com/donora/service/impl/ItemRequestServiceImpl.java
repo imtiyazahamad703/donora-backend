@@ -1,11 +1,16 @@
 package com.donora.service.impl;
 
+import com.donora.dto.ItemRequestPublicResponse;
 import com.donora.dto.ItemRequestRequest;
 import com.donora.dto.ItemRequestResponse;
+import com.donora.dto.kafka.EmergencyRequestKafkaMessage;
 import com.donora.entity.ItemRequest;
+import com.donora.entity.NgoProfile;
 import com.donora.entity.User;
+import com.donora.enums.DonationStatus;
 import com.donora.enums.RequestStatus;
 import com.donora.enums.UrgencyLevel;
+import com.donora.kafka.producer.EmergencyRequestKafkaProducer;
 import com.donora.repository.ItemRequestRepository;
 import com.donora.repository.UserRepository;
 import com.donora.service.ItemRequestService;
@@ -24,6 +29,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmergencyRequestKafkaProducer emergencyRequestKafkaProducer;
+
 
     @Override
     public ItemRequestResponse createItemRequest(ItemRequestRequest request, String ngoEmail) {
@@ -63,9 +72,25 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new RuntimeException("Access denied: This request does not belong to your NGO.");
         }
 
+        // ✅ Step 1: Mark as emergency in DB
         request.setEmergency(true);
         itemRequestRepository.save(request);
+
+        // ✅ Step 2: Print debug log
+        System.out.println("🔥 Inside markItemRequestAsEmergency: Will now send Kafka message");
+
+        // ✅ Step 3: Build Kafka DTO
+        EmergencyRequestKafkaMessage message = new EmergencyRequestKafkaMessage();
+        message.setNgoEmail(ngo.getEmail());
+        message.setItemName(request.getItemName());
+        message.setQuantity(request.getQuantity());
+        message.setUrgencyLevel(request.getUrgencyLevel().name());
+        message.setDescription(request.getDescription());
+
+        // ✅ Step 4: Send Kafka message
+        emergencyRequestKafkaProducer.sendEmergencyRequest(message);
     }
+
     /* shorthand
     @Override
     public List<ItemRequestResponse> getAllEmergencyNeeds() {
@@ -80,6 +105,34 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .map(item -> this.mapToResponse(item))
                 .toList();
     }
+
+    // ItemRequestServiceImpl.java
+    @Override
+    public List<ItemRequestPublicResponse> getAllOpenRequests() {
+        List<ItemRequest> openRequests = itemRequestRepository.findByStatus(RequestStatus.OPEN);
+
+        return openRequests.stream().map(request -> {
+            ItemRequestPublicResponse response = new ItemRequestPublicResponse();
+            response.setId(request.getId());
+            response.setItemName(request.getItemName());
+            response.setDescription(request.getDescription());
+            response.setQuantity(request.getQuantity());
+            response.setUrgencyLevel(request.getUrgencyLevel());
+            response.setCreatedAt(request.getCreatedAt());
+
+            NgoProfile ngoProfile = request.getNgo().getNgoProfile();
+            if (ngoProfile != null) {
+                response.setNgoName(ngoProfile.getOrganizationName());
+                response.setNgoCity(ngoProfile.getCity());
+                response.setNgoFocusArea(ngoProfile.getFocusArea());
+            } else {
+                response.setNgoName(request.getNgo().getName());
+            }
+
+            return response;
+        }).collect(Collectors.toList());
+    }
+
 
 
 

@@ -3,14 +3,18 @@ package com.donora.service.impl;
 import com.donora.dto.NgoImpactStatsResponse;
 import com.donora.dto.NgoProfileRequest;
 import com.donora.dto.NgoProfileResponse;
+import com.donora.dto.NgoPublicResponse;
+import com.donora.dto.kafka.EmergencyRequestKafkaMessage;
 import com.donora.entity.*;
 import com.donora.enums.DonationStatus;
+import com.donora.kafka.producer.EmergencyRequestKafkaProducer;
 import com.donora.repository.*;
 import com.donora.service.NgoProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NgoProfileServiceImpl implements NgoProfileService {
@@ -24,6 +28,12 @@ public class NgoProfileServiceImpl implements NgoProfileService {
     private ItemDonationRepository itemDonationRepository;
     @Autowired
     private FoodDonationRepository foodDonationRepository;
+
+    @Autowired
+    private ItemRequestRepository itemRequestRepository;
+
+    @Autowired
+    private EmergencyRequestKafkaProducer emergencyRequestKafkaProducer;
 
     @Override
     public NgoProfileResponse saveOrUpdateProfile(NgoProfileRequest request, String userEmail) {
@@ -105,6 +115,23 @@ public class NgoProfileServiceImpl implements NgoProfileService {
         response.setRecentAcceptedFoods(recentFoodNames);
 
         return response;
+    }
+
+    @Override
+    public List<NgoPublicResponse> getAllPublicNgos() {
+        List<NgoProfile> ngoProfiles = ngoProfileRepository.findAll();
+        return ngoProfiles.stream().map(profile -> {
+            NgoPublicResponse dto = new NgoPublicResponse();
+            dto.setOrganizationName(profile.getOrganizationName());
+            dto.setFocusArea(profile.getFocusArea());
+            dto.setAddress(profile.getAddress());
+            dto.setCity(profile.getCity());
+            dto.setState(profile.getState());
+            dto.setContactPerson(profile.getContactPerson());
+            dto.setContactPhone(profile.getContactPhone());
+            dto.setWebsite(profile.getWebsite());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
 

@@ -35,11 +35,14 @@ public class ItemRequestController {
         return ResponseEntity.ok(needs);
     }
 
+
+
     // ✅ PUT: Mark an item need as emergency
     @PutMapping("/{id}/emergency")
     public ResponseEntity<String> markAsEmergency(@PathVariable Long id, Principal principal) {
         itemRequestService.markItemRequestAsEmergency(id, principal.getName());
         return ResponseEntity.ok("Item request marked as emergency.");
     }
+
 
 }

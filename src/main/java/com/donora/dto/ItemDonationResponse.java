@@ -15,6 +15,7 @@ public class ItemDonationResponse {
     private String donorName;
     private String donorEmail;
     private String donorPhone;
+    private String ngoName;
 
     // Getters and Setters
     public Long getId() {
@@ -95,5 +96,13 @@ public class ItemDonationResponse {
 
     public void setDonorPhone(String donorPhone) {
         this.donorPhone = donorPhone;
+    }
+
+    public String getNgoName() {
+        return ngoName;
+    }
+
+    public void setNgoName(String ngoName) {
+        this.ngoName = ngoName;
     }
 }

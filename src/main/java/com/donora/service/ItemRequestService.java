@@ -1,5 +1,6 @@
 package com.donora.service;
 
+import com.donora.dto.ItemRequestPublicResponse;
 import com.donora.dto.ItemRequestRequest;
 import com.donora.dto.ItemRequestResponse;
 
@@ -12,5 +13,5 @@ public interface ItemRequestService {
     List<ItemRequestResponse> getItemRequestsByNgo(String ngoEmail);
     void markItemRequestAsEmergency(Long requestId, String ngoEmail);
     List<ItemRequestResponse> getAllEmergencyNeeds();
-
+    List<ItemRequestPublicResponse> getAllOpenRequests();
 }
