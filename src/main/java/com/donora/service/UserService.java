@@ -4,6 +4,7 @@ import com.donora.dto.*;
 import com.donora.entity.PasswordResetToken;
 import com.donora.enums.Role;
 import com.donora.entity.User;
+import com.donora.jwt.JwtService;
 import com.donora.repository.PasswordResetTokenRepository;
 import com.donora.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private JwtService jwtService;
 
     public RegisterResponse registerUser(RegisterRequest request) {
         // Check if email is already taken
@@ -75,12 +79,15 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        //Creating token to send jwt with login response to frontend
+        String token = jwtService.generateToken(user.getEmail());
         return new LoginResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
                 user.getPhone(),
-                user.getRole()
+                user.getRole(),
+                token
         );
     }
     // ================================

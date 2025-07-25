@@ -8,13 +8,16 @@ public class LoginResponse {
     private String email;
     private Role role;
     private String phone;
+    private String token; // to store token
 
-    public LoginResponse(Long id, String name, String email, String phone,Role role) {
+
+    public LoginResponse(Long id, String name, String email, String phone,Role role,String token) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
         this.phone = phone;
+        this.token=token;
     }
     public Long getId() {
         return id;
@@ -34,5 +37,8 @@ public class LoginResponse {
 
     public String getPhone() {
         return phone;
+    }
+    public String getToken(){
+        return token;
     }
 }
